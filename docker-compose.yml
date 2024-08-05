@@ -1,0 +1,39 @@
+networks:
+    laravel:
+        driver: bridge
+
+services:
+    php:
+        container_name: php
+        build:
+            dockerfile: docker/local/php/Dockerfile
+        volumes:
+            - './:/var/www/html'
+        links:
+            - mysql
+        depends_on:
+            - mysql
+
+    nginx:
+        container_name: nginx
+        image: nginx:latest
+        ports:
+            - 80:80
+        volumes:
+            - './:/var/www/html'
+            - './docker/local/nginx/conf.d:/etc/nginx/conf.d'
+        links:
+            - php
+        depends_on:
+            - php
+            - mysql
+
+    mysql:
+        container_name: mysql
+        image: mysql:8
+        ports:
+            - 3306:3306
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+        volumes:
+            - './docker/volume/mysql:/var/lib/mysql'
